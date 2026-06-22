@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MEW — Email Address Audit Test</title>
+<style>
+  body { font-family: ui-monospace, monospace; background: #1e1e2e; color: #cdd6f4; padding: 32px; }
+  h1 { color: #89b4fa; margin-bottom: 8px; }
+  .subtitle { color: #6c7086; margin-bottom: 32px; font-size: 13px; }
+  .section { margin-bottom: 32px; }
+  h2 { color: #a6adc8; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; border-bottom: 1px solid #313244; padding-bottom: 6px; }
+  .chip-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 13px; }
+  .label { color: #6c7086; min-width: 220px; }
+  .chip {
+    display: inline-block;
+    background: #313244;
+    border: 1px solid #45475a;
+    border-radius: 20px;
+    padding: 4px 12px;
+    cursor: default;
+    color: #89b4fa;
+    font-size: 13px;
+    transition: background 0.15s;
+  }
+  .chip:hover { background: #45475a; }
+  .note { color: #6c7086; font-size: 11px; }
+  .signal-list { background: #181825; border: 1px solid #313244; border-radius: 8px; padding: 16px; margin-top: 24px; }
+  .signal-list h3 { color: #a6adc8; font-size: 12px; margin: 0 0 10px; }
+  .signal { font-size: 12px; margin-bottom: 6px; }
+  .danger { color: #f38ba8; }
+  .warning { color: #fab387; }
+  .ok { color: #a6e3a1; }
+  kbd { background: #313244; border: 1px solid #45475a; border-radius: 4px; padding: 2px 6px; font-size: 11px; }
+  .worst { border-color: #f38ba8; background: #2a1e2e; }
+  .worst:hover { background: #3a2535; }
+  .expected { background: #181825; border: 1px solid #313244; border-radius: 6px; padding: 8px 12px; margin-top: 6px; margin-left: 230px; font-size: 11px; line-height: 1.7; }
+  .expected .ex-title { color: #6c7086; margin-bottom: 4px; }
+  .ex-danger { color: #f38ba8; }
+  .ex-warning { color: #fab387; }
+  .ex-ok { color: #a6e3a1; }
+  .ex-score { color: #6c7086; margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<h1>MEW — Email Address Audit Test</h1>
+<div class="subtitle">Hover address chips to trigger signals. Arm Email Audit in popup first.</div>
+
+<div class="section">
+  <h2>Worst Case — Maximum Signals (4 of 6)</h2>
+  <p style="color:#6c7086;font-size:11px;margin:0 0 12px">Signals 1 &amp; 2 are mutually exclusive (same brand check). Best single address = 4 signals.</p>
+
+  <div class="chip-row">
+    <span class="label">All problems combined:</span>
+    <span class="chip worst" data-hovercard-id="1234567@paypa1.xyz">PayPal Security</span>
+    <span class="note">display mismatch + lookalike + suspicious TLD + numeric local → score 41 → High</span>
+  </div>
+  <div class="expected">
+    <div class="ex-title">Expected bubble:</div>
+    <div class="ex-danger">⛔ Display/domain mismatch: "PayPal Security" → paypa1.xyz</div>
+    <div class="ex-danger">⛔ Lookalike domain: paypa1.xyz resembles paypal.com</div>
+    <div class="ex-warning">⚠️ Suspicious TLD: .xyz is high-risk</div>
+    <div class="ex-warning">⚠️ Numeric-only local: Sender ID is all digits</div>
+    <div class="ex-score">📧 Sender Risk: High (41 pts)</div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Individual Signals — L1 Client Side</h2>
+
+  <div class="chip-row">
+    <span class="label">1. Brand impersonation:</span>
+    <span class="chip" data-hovercard-id="noreply@gmail.com">PayPal Security</span>
+    <span class="note">"PayPal Security" via free provider gmail.com → +20</span>
+  </div>
+  <div class="expected">
+    <div class="ex-title">Expected bubble:</div>
+    <div class="ex-danger">⛔ Brand impersonation: "PayPal Security" via free provider gmail.com</div>
+    <div class="ex-score">📧 Sender Risk: High (20 pts)</div>
+  </div>
+
+  <div class="chip-row">
+    <span class="label">2. Display/domain mismatch:</span>
+    <span class="chip" data-hovercard-id="boss@randomco.com">Apple</span>
+    <span class="note">"Apple" but domain has no apple → +10</span>
+  </div>
+  <div class="expected">
+    <div class="ex-title">Expected bubble:</div>
+    <div class="ex-warning">⚠️ Display/domain mismatch: "Apple" → randomco.com</div>
+    <div class="ex-score">📧 Sender Risk: Low (10 pts)</div>
+  </div>
+
+  <div class="chip-row">
+    <span class="label">3. Lookalike domain:</span>
+    <span class="chip" data-hovercard-id="support@paypa1.com">support@paypa1.com</span>
+    <span class="note">paypa1 ≈ paypal (edit distance 1) → +18</span>
+  </div>
+  <div class="expected">
+    <div class="ex-title">Expected bubble:</div>
+    <div class="ex-danger">⛔ Lookalike domain: paypa1.com resembles paypal.com</div>
+    <div class="ex-score">📧 Sender Risk: Medium (18 pts)</div>
+  </div>
+
+  <div class="chip-row">
+    <span class="label">4. Suspicious TLD:</span>
+    <span class="chip" data-hovercard-id="info@company.xyz">info@company.xyz</span>
+    <span class="note">.xyz = high-risk TLD → +8</span>
+  </div>
+  <div class="expected">
+    <div class="ex-title">Expected bubble:</div>
+    <div class="ex-warning">⚠️ Suspicious TLD: .xyz is high-risk</div>
+    <div class="ex-score">📧 Sender Risk: Low (8 pts)</div>
+  </div>
+
+  <div class="chip-row">
+    <span class="label">5. Disposable address:</span>
+    <span class="chip" data-hovercard-id="user@mailinator.com">user@mailinator.com</span>
+    <span class="note">mailinator.com = known throwaway provider → +20</span>
+  </div>
+  <div class="expected">
+    <div class="ex-title">Expected bubble:</div>
+    <div class="ex-danger">⛔ Disposable address: mailinator.com is a throwaway provider</div>
+    <div class="ex-score">📧 Sender Risk: High (20 pts)</div>
+  </div>
+
+  <div class="chip-row">
+    <span class="label">6. Numeric-only local:</span>
+    <span class="chip" data-hovercard-id="1234567890@outlook.com">1234567890@outlook.com</span>
+    <span class="note">All-digit sender ID → +5</span>
+  </div>
+  <div class="expected">
+    <div class="ex-title">Expected bubble:</div>
+    <div class="ex-warning">⚠️ Numeric-only local: Sender ID is all digits</div>
+    <div class="ex-score">📧 Sender Risk: Low (5 pts)</div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Clean — No Signals Expected</h2>
+
+  <div class="chip-row">
+    <span class="label">Legit corporate:</span>
+    <span class="chip" data-hovercard-id="support@google.com">Google Support</span>
+  </div>
+  <div class="expected">
+    <div class="ex-title">Expected bubble:</div>
+    <div class="ex-ok">✅ No risk signals detected</div>
+    <div class="ex-score">📧 Sender Risk: Low</div>
+  </div>
+
+  <div class="chip-row">
+    <span class="label">Legit personal:</span>
+    <span class="chip" data-hovercard-id="juraj@gmail.com">Juraj</span>
+  </div>
+  <div class="expected">
+    <div class="ex-title">Expected bubble:</div>
+    <div class="ex-ok">✅ No risk signals detected</div>
+    <div class="ex-score">📧 Sender Risk: Low</div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>L2 Signals — DNS / RDAP (requires Wrangler dev)</h2>
+  <p style="color:#6c7086;font-size:11px;margin:0 0 12px">Click chip to open deep panel → DNS / Domain Audit section populates via backend. Hover shows L1 only.</p>
+
+  <!-- DMARC: none — confirmed 2026-06-03 -->
+  <div class="chip-row">
+    <span class="label">DMARC p=none:</span>
+    <span class="chip" data-hovercard-id="zarecka@zahorskabystrica.sk">Zuzana Zárecká</span>
+    <span class="note">zahorskabystrica.sk has DMARC but p=none — no enforcement → +8 · L2 Low</span>
+  </div>
+  <div class="expected">
+    <div class="ex-title">Expected L2 (confirmed 2026-06-03):</div>
+    <div class="ex-warning">⚠️ DMARC: none — DMARC policy set to none — no enforcement (+8)</div>
+    <div class="ex-score">L2 Risk: Low (+8 pts)</div>
+  </div>
+
+  <!-- DMARC fallback — confirmed 2026-06-03 -->
+  <div class="chip-row">
+    <span class="label">DMARC fallback (subdomain):</span>
+    <span class="chip" data-hovercard-id="mail@notice.alibaba.com">Alibaba</span>
+    <span class="note">notice.alibaba.com has no own DMARC — falls back to alibaba.com p=reject → clean</span>
+  </div>
+  <div class="expected">
+    <div class="ex-title">Expected L2 (confirmed 2026-06-03 after fallback fix):</div>
+    <div class="ex-ok">✅ Domain records clean — no L2 signals</div>
+    <div class="ex-score">L2 Risk: Low (0 pts)</div>
+  </div>
+
+  <!-- No DMARC at all -->
+  <div class="chip-row">
+    <span class="label">No DMARC record:</span>
+    <span class="chip" data-hovercard-id="info@lacnestavebniny.sk">Lacné Stavebiny</span>
+    <span class="note">lacnestavebniny.sk — HTTP site, likely no DMARC → +15 danger</span>
+  </div>
+  <div class="expected">
+    <div class="ex-title">Expected L2:</div>
+    <div class="ex-danger">⛔ No DMARC — Domain has no DMARC record (+15)</div>
+    <div class="ex-score">L2 Risk: Low/Medium depending on SPF</div>
+  </div>
+
+  <!-- No MX records -->
+  <div class="chip-row">
+    <span class="label">No MX records:</span>
+    <span class="chip" data-hovercard-id="admin@send-only-domain.xyz">Admin</span>
+    <span class="note">Domain exists but no MX — can't receive email → throwaway signal → +18</span>
+  </div>
+  <div class="expected">
+    <div class="ex-title">Expected L2:</div>
+    <div class="ex-danger">⛔ No MX records — Domain cannot receive email — likely throwaway (+18)</div>
+    <div class="ex-score">L2 Risk: Medium (18 pts)</div>
+  </div>
+
+  <!-- New domain (RDAP age) -->
+  <div class="chip-row">
+    <span class="label">New domain (&lt;30 days):</span>
+    <span class="chip" data-hovercard-id="support@fresh-phish-domain.top">Support Team</span>
+    <span class="note">Newly registered domain — RDAP age check fires → +25 danger</span>
+  </div>
+  <div class="expected">
+    <div class="ex-title">Expected L2:</div>
+    <div class="ex-danger">⛔ New domain — Registered N days ago (+25)</div>
+    <div class="ex-score">L2 Risk: High if also No DMARC</div>
+  </div>
+
+  <!-- Combined L1 + L2 worst case -->
+  <div class="chip-row">
+    <span class="label">L1 + L2 combined:</span>
+    <span class="chip worst" data-hovercard-id="1234@paypa1.xyz">PayPal Security</span>
+    <span class="note">L1: lookalike+TLD+numeric+mismatch (41pts) + L2: No DMARC+No MX → Max combined risk</span>
+  </div>
+  <div class="expected">
+    <div class="ex-title">Expected combined:</div>
+    <div class="ex-danger">⛔ Display/domain mismatch · Lookalike domain (+L1)</div>
+    <div class="ex-danger">⛔ No DMARC · No MX records (+L2)</div>
+    <div class="ex-score">Overall Risk: High — L1 + L2 both fire</div>
+  </div>
+</div>
+
+<div class="signal-list">
+  <h3>L1 Signals Summary</h3>
+  <div class="signal danger">⛔ Brand impersonation — "PayPal Security" via gmail.com (+20)</div>
+  <div class="signal danger">⛔ Lookalike domain — paypa1.com resembles paypal.com (+18)</div>
+  <div class="signal danger">⛔ Disposable address — mailinator.com (+20)</div>
+  <div class="signal warning">⚠️ Display/domain mismatch — "Apple" → randomco.com (+10)</div>
+  <div class="signal warning">⚠️ Suspicious TLD — .xyz (+8)</div>
+  <div class="signal warning">⚠️ Numeric-only local — all digits (+5)</div>
+  <h3 style="margin-top:12px">L2 DNS/RDAP Signals Summary</h3>
+  <div class="signal danger">⛔ New domain — registered &lt;30 days (RDAP) (+25)</div>
+  <div class="signal danger">⛔ No DMARC — no DMARC record (+15)</div>
+  <div class="signal danger">⛔ No MX — domain can't receive email (+18)</div>
+  <div class="signal warning">⚠️ DMARC: none — policy exists, p=none, no enforcement (+8)</div>
+  <div class="signal warning">⚠️ No SPF — no SPF record (+12)</div>
+</div>
+
+<div style="margin-top:24px;color:#6c7086;font-size:11px">
+  Arm: open extension popup → Email Audit toggle.<br>
+  L2 requires worker: <kbd>make -C /Users/jurajbadal/MAIL_EXT start</kbd><br>
+  Click chip (not hover) to open deep panel and trigger L2 DNS audit.
+</div>
+
+</body>
+</html>
